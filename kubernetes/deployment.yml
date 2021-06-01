@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: advertisement
+  labels:
+    app: advertisement
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: advertisement
+  template:
+    metadata:
+      labels:
+        app: advertisement
+    spec:
+      containers:
+        - name: advertisement
+          image: username/advertisement:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 500m
+            requests:
+              cpu: 500m             
+          readinessProbe:
+            httpGet:
+              path: '/advertisements'
+              port: 8080
+            initialDelaySeconds: 20
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: '/advertisements'
+              port: 8080
+            initialDelaySeconds: 180
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 5
