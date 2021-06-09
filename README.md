@@ -157,7 +157,7 @@
 
 ### 1차 완성본에 대한 기능적/비기능적 요구사항을 커버하는지 검증
 
-<img width="354" alt="1차본완성_1" src="https://user-images.githubusercontent.com/80744183/119315026-5918de00-bcb0-11eb-9cd4-048d7e9413b9.png">
+<img width="510" alt="8_1 완성된1차모형_검증" src="https://user-images.githubusercontent.com/80744183/121277152-f6a81a80-c90a-11eb-9c2e-ff6e5fd5a2d8.png">
     
     - 수강생이 강의를 신청한다 (ok)
     - 수강생이 강의를 결제한다 (ok)
@@ -166,12 +166,12 @@
     - 강사가 광고를 등록한다 (ok)
     
 
-<img width="354" alt="1차본완성_2" src="https://user-images.githubusercontent.com/80744183/119315093-72218f00-bcb0-11eb-89da-74c039d0435a.png">
+<img width="510" alt="8_2 완성된1차모형_검증" src="https://user-images.githubusercontent.com/80744183/121277192-0c1d4480-c90b-11eb-9e09-db1361d9fa83.png">
     
     - 수강생이 강의를 취소할 수 있다 (ok) 
     - 강의가 취소되면 결제 취소된다 (ok) 
     - 결제가 취소되면 배송이 취소된다 (ok) 
-    - 주문상태가 바뀔 때 마다 카톡으로 알림을 보낸다 (?)
+    - 수강신청상태가 바뀔 때 마다 카톡으로 알림을 보낸다 (?)
     - 강사가 광고를 취소한다 (ok)
 
 ### 모델 수정
