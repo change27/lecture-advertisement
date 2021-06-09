@@ -113,29 +113,29 @@
 # 분석/설계
 
 ## Event Storming 결과
-* MSAEz 로 모델링한 이벤트스토밍 결과:  http://www.msaez.io/#/storming/OnQd88FgmmV8NAUxHBeXJxxGyvf2/share/377bfc543592e100d0e49f380692a442
+* MSAEz 로 모델링한 이벤트스토밍 결과:  http://www.msaez.io/#/storming/VQqDyoUujgdOgyVDVvZ2d4TCXcF3/mine/974cf73d44d1b5197c54942dd8ec4372
 
 
 ### 이벤트 도출
-![이벤트 도출](https://user-images.githubusercontent.com/80744183/119314240-7ef1b300-bcaf-11eb-8fa5-6c3dedc7975c.png)
+![1_이벤트도출](https://user-images.githubusercontent.com/80744183/121274319-3835c700-c905-11eb-90f7-1177cba0916a.png)
 
 ### 부적격 이벤트 탈락
-![부적격 이벤트](https://user-images.githubusercontent.com/80744183/119314284-8d3fcf00-bcaf-11eb-9eb8-3a6d47c4a246.png)
+![2_부적격이벤트탈락](https://user-images.githubusercontent.com/80744183/121274459-7df28f80-c905-11eb-8347-34bfa6b25206.png)
 
     - 과정중 도출된 잘못된 도메인 이벤트들을 걸러내는 작업을 수행함
         - 통보, 알림의 경우 학생, 강사의 행위와 상관없이 자동적으로 수행되어야 함, 이벤트에서 제외
 
 ### 액터, 커맨드 부착하여 읽기 좋게
-![액터커맨드](https://user-images.githubusercontent.com/80744183/119314373-a6488000-bcaf-11eb-9097-4204f5cef330.png)
+![3_액터, 커맨드 부착](https://user-images.githubusercontent.com/80744183/121274494-94005000-c905-11eb-8022-8380ba34ff62.png)
 
 ### 어그리게잇으로 묶기
-![어그리게잇](https://user-images.githubusercontent.com/80744183/119314463-beb89a80-bcaf-11eb-868c-e307669ccc30.png)
+![4_어그리게잇](https://user-images.githubusercontent.com/80744183/121274515-9c588b00-c905-11eb-822c-a84a4fa004fe.png)
 
     - class의 수강신청, course의 강의등록, 결제의 결제이력은 그와 연결된 command 와 event 들에 의하여 트랜잭션이 유지되어야 하는 단위로 그들 끼리 묶어줌
 
 ### 바운디드 컨텍스트로 묶기
 
-![바운디드](https://user-images.githubusercontent.com/80744183/119314555-d8f27880-bcaf-11eb-82cd-092f27876c0d.png)
+![5_바운디드컨텍스트](https://user-images.githubusercontent.com/80744183/121274531-a67a8980-c905-11eb-98bf-36e4c0ec4c35.png)
 
     - 도메인 서열 분리 
         - Core Domain:  class, course : 없어서는 안될 핵심 서비스이며, 연견 Up-time SLA 수준을 99.999% 목표, 배포주기는 class 의 경우 1주일 1회 미만, course 의 경우 1개월 1회 미만
@@ -143,15 +143,15 @@
 
 ### 폴리시 부착 (괄호는 수행주체, 폴리시 부착을 둘째단계에서 해놔도 상관 없음. 전체 연계가 초기에 드러남)
 
-![폴리시 부착](https://user-images.githubusercontent.com/80744183/119314651-f293c000-bcaf-11eb-975d-36e1bcf1fd40.png)
+![6_폴리시 부착](https://user-images.githubusercontent.com/80744183/121274543-aed2c480-c905-11eb-8cac-c8d7ef420b80.png)
 
 ### 폴리시의 이동과 컨텍스트 매핑 (점선은 Pub/Sub, 실선은 Req/Resp)
 
-![1차본](https://user-images.githubusercontent.com/80744183/119314934-40102d00-bcb0-11eb-8ffa-e3807f05c5d7.png)
+![7_폴리시의이동과컨텍스트매핑](https://user-images.githubusercontent.com/80744183/121274568-babe8680-c905-11eb-94d0-ef6cd8ee0bd6.png)
 
 ### 완성된 1차 모형
 
-![1차본완성](https://user-images.githubusercontent.com/80744183/119314979-4bfbef00-bcb0-11eb-8e31-51cc5ef9d9fc.png)
+![8_완성된1차모형](https://user-images.githubusercontent.com/80744183/121274577-c4e08500-c905-11eb-9804-ba4367ce5a1b.png)
 
     - View Model 추가
 
@@ -176,14 +176,14 @@
 
 ### 모델 수정
 
-![모델수정](https://user-images.githubusercontent.com/80744183/119315187-8cf40380-bcb0-11eb-88cf-26f55d8a8b70.png)
+![9_모델수정](https://user-images.githubusercontent.com/80744183/121274619-dc1f7280-c905-11eb-9ca5-1be92a079156.png)
     
     - 수정된 모델은 모든 요구사항을 커버함.
     - 배송 등록 event의 경우 한 event로 통함함.
 
 ### 비기능 요구사항에 대한 검증
 
-<img width="374" alt="비기능적요구사항" src="https://user-images.githubusercontent.com/80744183/119315219-95e4d500-bcb0-11eb-9d37-8621220cc468.png">
+![10_비기능 요구사항에 대한 검증](https://user-images.githubusercontent.com/80744183/121274651-ed687f00-c905-11eb-9a66-a38e92410421.png)
 
     - 마이크로 서비스를 넘나드는 시나리오에 대한 트랜잭션 처리
         - 수강생 주문시 결제처리:  결제가 완료되지 않은 주문은 절대 받지 않는다는 경영자의 오랜 신념(?) 에 따라, ACID 트랜잭션 적용. 주문와료시 결제처리에 대해서는 Request-Response 방식 처리
@@ -194,7 +194,7 @@
 
 
 ## 헥사고날 아키텍처 다이어그램 도출
-![헥사고날3](https://user-images.githubusercontent.com/80744183/119422472-21f00e80-bd3c-11eb-9aeb-edc9e423a5b0.png)
+![11_헥사고날](https://user-images.githubusercontent.com/80744183/121274669-f6f1e700-c905-11eb-8278-c88d49746576.png)
 
 
 
