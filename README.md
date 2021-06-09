@@ -230,42 +230,7 @@ mvn spring-boot:run
 ```
 
 - 아래 부터는 AWS 클라우드의 EKS 서비스 내에 서비스를 모두 배포 후 설명을 진행한다.
-```
-root@labs-1409824742:/home/project/team/lecture/course/kubernetes# kubectl get all
-NAME                           READY   STATUS    RESTARTS   AGE
-pod/alert-7cbc74668-clsdv      2/2     Running   0          3h13m
-pod/class-5864b4f7cc-rzrz9     1/1     Running   0          163m
-pod/course-64978c8dd8-nmwxp    1/1     Running   0          112m
-pod/gateway-65d7888594-mqpls   1/1     Running   0          3h11m
-pod/pay-575875fc9-kk56d        1/1     Running   2          162m
-pod/siege                      1/1     Running   0          8h
 
-NAME                 TYPE           CLUSTER-IP       EXTERNAL-IP                                                                  PORT(S)          AGE
-service/alert        ClusterIP      10.100.108.57    <none>                                                                       8084/TCP         6h43m
-service/class        ClusterIP      10.100.233.190   <none>                                                                       8080/TCP         7h12m
-service/course       ClusterIP      10.100.121.125   <none>                                                                       8080/TCP         3h30m
-service/gateway      LoadBalancer   10.100.138.145   aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com   8080:31881/TCP   8h
-service/kubernetes   ClusterIP      10.100.0.1       <none>                                                                       443/TCP          9h
-service/pay          ClusterIP      10.100.76.173    <none>                                                                       8080/TCP         7h4m
-
-NAME                      READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/alert     1/1     1            1           3h13m
-deployment.apps/class     1/1     1            1           163m
-deployment.apps/course    1/1     1            1           3h12m
-deployment.apps/gateway   1/1     1            1           3h11m
-deployment.apps/pay       1/1     1            1           162m
-
-NAME                                 DESIRED   CURRENT   READY   AGE
-replicaset.apps/alert-7cbc74668      1         1         1       3h13m
-replicaset.apps/class-5864b4f7cc     1         1         1       163m
-replicaset.apps/course-64978c8dd8    1         1         1       3h12m
-replicaset.apps/gateway-65d7888594   1         1         1       3h11m
-replicaset.apps/pay-575875fc9        1         1         1       162m
-
-NAME                                        REFERENCE          TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
-horizontalpodautoscaler.autoscaling/class   Deployment/class   0%/30%    1         10        1          155m
-horizontalpodautoscaler.autoscaling/pay     Deployment/pay     0%/30%    1         10        1          155m
-```
 
 ## DDD 의 적용
 
@@ -278,38 +243,58 @@ package lecture;
 import javax.persistence.*;
 import org.springframework.beans.BeanUtils;
 
+import lecture.external.Payment;
+import lecture.external.PaymentService;
+
+
 @Entity
-@Table(name = "Course_table")
-public class Course {
+@Table(name="Advertisement_table")
+public class Advertisement {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-    private String name;
-    private String teacher;
-    private Long fee;
-    private String textBook;
+    private Long courseId;
+    private String status;
 
     @PostPersist
-    public void onPostPersist() {
-        CourseRegistered courseRegistered = new CourseRegistered();
-        BeanUtils.copyProperties(this, courseRegistered);
-        courseRegistered.publishAfterCommit();
-    }
+    public void onPostPersist() throws Exception{
+        Payment payment = new Payment();
+        // mappings goes here
+        payment.setAdId(this.getId());
+        payment.setCourseId(this.getCourseId());;
+        payment.setStatus("PAYMENT_COMPLETED");
+        
+        System.out.println("*****************onPostPersist");
+        if (AdvertisementApplication.applicationContext.getBean(PaymentService.class).pay(payment)) {
+            AdRegistered adRegistered = new AdRegistered();
+            BeanUtils.copyProperties(this, adRegistered);
+            adRegistered.publishAfterCommit();
+        }else {
+            throw new RollbackException("Failed during payment");
+        }
 
-    @PostUpdate
-    public void onPostUpdate() {
-        CourseModified courseModified = new CourseModified();
-        BeanUtils.copyProperties(this, courseModified);
-        courseModified.publishAfterCommit();
+
+        //Following code causes dependency to external APIs
+        // it is NOT A GOOD PRACTICE. instead, Event-Policy mapping is recommended.
+
+ //       lecture.external.Payment payment = new lecture.external.Payment();
+ //       // mappings goes here
+ //       Application.applicationContext.getBean(lecture.external.PaymentService.class)
+ //           .pay(payment);
+
+
     }
 
     @PreRemove
-    public void onPreRemove() {
-        CourseDeleted courseDeleted = new CourseDeleted();
-        BeanUtils.copyProperties(this, courseDeleted);
-        courseDeleted.publishAfterCommit();
+    public void onPreRemove(){
+        AdCanceled adCanceled = new AdCanceled();
+        BeanUtils.copyProperties(this, adCanceled);
+        adCanceled.publishAfterCommit();
+
+        System.out.println("*****************onPreRemove");
     }
+
 
     public Long getId() {
         return id;
@@ -318,90 +303,89 @@ public class Course {
     public void setId(Long id) {
         this.id = id;
     }
-
-    public String getName() {
-        return name;
+    public Long getCourseId() {
+        return courseId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCourseId(Long courseId) {
+        this.courseId = courseId;
+    }
+    public String getStatus() {
+        return status;
     }
 
-    public String getTeacher() {
-        return teacher;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
-    public void setTeacher(String teacher) {
-        this.teacher = teacher;
-    }
 
-    public String getTextBook() {
-        return textBook;
-    }
 
-    public void setTextBook(String textBook) {
-        this.textBook = textBook;
-    }
-
-    public Long getFee() {
-        return fee;
-    }
-
-    public void setFee(Long fee) {
-        this.fee = fee;
-    }
 
 }
+
 ```
 - Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다
 ```
 package lecture;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-public interface CourseRepository extends PagingAndSortingRepository<Course, Long> {
+@RepositoryRestResource(collectionResourceRel="advertisements", path="advertisements")
+public interface AdvertisementRepository extends PagingAndSortingRepository<Advertisement, Long>{
+
 
 }
+
 ```
 
 - 적용 후 REST API 의 테스트
 
 ```
 # 신규 강좌 등록
-http POST http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/courses name=korean teacher=hong-gil-dong fee=10000 textBook=kor_book
+http POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/courses name=korean teacher=hong-gil-dong fee=10000 textBook=kor_book
 
 # 등록된 강좌 확인
-http GET http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/courses
+http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/courses
 
 # 수강 신청
-http POST http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/classes courseId=1 fee=10000 student=john-doe textBook=kor_book
+http POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/classes courseId=3 fee=10000 student=john-doe textBook=kor_book
 
 # 수강 등록 확인
-http GET http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/classes
+http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/classes
 
 # 결제 성공 확인
-http GET http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/payments
+http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/payments
 
 # 수강 교재 배송 시작 확인
-http GET http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/deliveries
+http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/deliveries
 
 # My page에서 수강신청여부/결제성공여부/배송상태 확인
-http GET http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/inquiryMypages
+http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/inquiryMypages
 
 # 수강 취소
-http DELETE http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/classes/1
+http DELETE http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/classes/1
 
 # 수강 삭제 확인
-http GET http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/classes
+http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/classes
 
 # 결제 취소 확인 (상태값 "CANCEL" 확인)
-http GET http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/payments
+http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/payments
 
 # 배송 취소 확인 (상태값 "DELIVERY_CANCEL" 확인)
-http GET http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/deliveries
+http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/deliveries
 
 # My page에서 수강신청여부/결제성공여부/배송상태 확인
-http GET http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/inquiryMypages
+http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/inquiryMypages
+
+#광고 등록
+http POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements courseId=1 status=start
+
+#광고 취소
+http DELETE http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements/1
+
+#광고관리 페이지  확인
+http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8088/inquiryAdversises
 
 ```
 
@@ -426,23 +410,51 @@ Spring Cloud JPA를 사용하여 개발하였기 때문에 소스의 변경 부�
 
 ```
 
-- mysql 서비스 확인 (kubectl get all,pvc -n mysql)
+- MS, mysql 서비스 확인 (kubectl get all)
 
 ```
-NAME                                    READY   STATUS    RESTARTS   AGE
-pod/mysql-1621826572-7b6b9d8477-qsjmb   1/1     Running   0          3h44m
+root@labs--1920632125:/home/project# kubectl get all
+NAME                                   READY   STATUS    RESTARTS   AGE
+pod/advertisement-5dfb68f5cd-xh9rw     1/1     Running   0          120m
+pod/alert-76db565fd8-k49j8             2/2     Running   0          129m
+pod/class-c495fdf9c-m7c9m              1/1     Running   0          3h23m
+pod/course-595968744d-bbkk4            1/1     Running   0          3h19m
+pod/gateway-98b9fd9c4-wzpcr            1/1     Running   0          3h26m
+pod/mysql-1623203575-78d789465-czkkv   1/1     Running   0          5h
+pod/pay-5db57b5775-p47m9               1/1     Running   0          20m
+pod/ubuntu                             1/1     Running   0          14m
 
-NAME                       TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
-service/mysql-1621826572   ClusterIP   10.100.64.70   <none>        3306/TCP   8h
+NAME                       TYPE           CLUSTER-IP       EXTERNAL-IP                                                                 PORT(S)          AGE
+service/advertisement      ClusterIP      10.100.88.27     <none>                                                                      8080/TCP         120m
+service/alert              ClusterIP      10.100.154.228   <none>                                                                      8084/TCP         128m
+service/class              ClusterIP      10.100.100.24    <none>                                                                      8080/TCP         3h23m
+service/course             ClusterIP      10.100.230.192   <none>                                                                      8080/TCP         3h19m
+service/gateway            LoadBalancer   10.100.155.14    ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com   8080:32699/TCP   3h26m
+service/kubernetes         ClusterIP      10.100.0.1       <none>                                                                      443/TCP          5h27m
+service/mysql-1623203575   ClusterIP      10.100.174.156   <none>                                                                      3306/TCP         5h
+service/pay                ClusterIP      10.100.244.205   <none>                                                                      8080/TCP         20m
 
 NAME                               READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/mysql-1621826572   1/1     1            1           8h
+deployment.apps/advertisement      1/1     1            1           120m
+deployment.apps/alert              1/1     1            1           129m
+deployment.apps/class              1/1     1            1           3h23m
+deployment.apps/course             1/1     1            1           3h19m
+deployment.apps/gateway            1/1     1            1           3h26m
+deployment.apps/mysql-1623203575   1/1     1            1           5h
+deployment.apps/pay                1/1     1            1           20m
 
-NAME                                          DESIRED   CURRENT   READY   AGE
-replicaset.apps/mysql-1621826572-7b6b9d8477   1         1         1       8h
+NAME                                         DESIRED   CURRENT   READY   AGE
+replicaset.apps/advertisement-5dfb68f5cd     1         1         1       120m
+replicaset.apps/alert-76db565fd8             1         1         1       129m
+replicaset.apps/class-c495fdf9c              1         1         1       3h23m
+replicaset.apps/course-595968744d            1         1         1       3h19m
+replicaset.apps/gateway-98b9fd9c4            1         1         1       3h26m
+replicaset.apps/mysql-1623203575-78d789465   1         1         1       5h
+replicaset.apps/pay-5db57b5775               1         1         1       20m
 
-NAME                                     STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
-persistentvolumeclaim/mysql-1621826572   Bound    pvc-d746469a-9f39-4177-9f5a-1aee384d6064   8Gi        RWO            gp2            8h
+NAME                                        REFERENCE          TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/class   Deployment/class   0%/30%    1         10        1          155m
+horizontalpodautoscaler.autoscaling/pay     Deployment/pay     0%/30%    1         10        1          155m
 ```
 
 ## 폴리글랏 프로그래밍
@@ -495,6 +507,7 @@ ENTRYPOINT ["python","-u","alert_consumer.py"]
 ```
 # (class) PaymentService.java
 
+
 package lecture.external;
 
 import org.springframework.cloud.openfeign.FeignClient;
@@ -502,10 +515,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+
 @FeignClient(name="pay", url="${api.payment.url}", fallback = PaymentServiceFallback.class)
 public interface PaymentService {
 
-    @RequestMapping(method= RequestMethod.POST, path="/succeedPayment")
+    @RequestMapping(method= RequestMethod.GET, path="/succeedAdPayment")
     public boolean pay(@RequestBody Payment payment);
 
 }
@@ -533,25 +547,23 @@ public class PaymentServiceFallback implements PaymentService {
 
 - 주문을 받은 직후(@PostPersist) 결제를 요청하도록 처리
 ```
-# Class.java (Entity)
+# Advertisement.java (Entity)
     @PostPersist
-    public void onPostPersist() throws Exception {
+    public void onPostPersist() throws Exception{
         Payment payment = new Payment();
-        payment.setClassId(this.getId());
-        payment.setCourseId(this.getCourseId());
-        payment.setFee(this.getFee());
-        payment.setStudent(this.getStudent());
+        // mappings goes here
+        payment.setAdId(this.getId());
+        payment.setCourseId(this.getCourseId());;
         payment.setStatus("PAYMENT_COMPLETED");
-        payment.setTextBook(this.getTextBook());
-
-        if (ClassApplication.applicationContext.getBean(PaymentService.class).pay(payment)) {
-            ClassRegistered classRegistered = new ClassRegistered();
-            BeanUtils.copyProperties(this, classRegistered);
-            classRegistered.publishAfterCommit();
+        
+        System.out.println("*****************onPostPersist");
+        if (AdvertisementApplication.applicationContext.getBean(PaymentService.class).pay(payment)) {
+            AdRegistered adRegistered = new AdRegistered();
+            BeanUtils.copyProperties(this, adRegistered);
+            adRegistered.publishAfterCommit();
         }else {
             throw new RollbackException("Failed during payment");
         }
-    }
 ```
 
 - 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 결제 시스템이 장애가 나면 주문도 못받는다는 것을 확인:
@@ -563,15 +575,15 @@ cd ./pay/kubernetes
 kubectl delete -f deployment.yml
 
 # 수강 신청
-http POST http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/classes courseId=1 fee=10000 student=KimSoonHee textBook=eng_book #Fail
-http POST http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/classes courseId=1 fee=12000 student=JohnDoe textBook=kor_book #Fail
+http POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements courseId=1 status=start #Fail
+http POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/classes courseId=1 fee=12000 student=JohnDoe textBook=kor_book #Fail
 
 # 결제서비스 재기동
 kubectl apply -f deployment.yml
 
 # 수강 신청
-http POST http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/classes courseId=1 fee=10000 student=KimSoonHee textBook=eng_book #Success
-http POST http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/classes courseId=1 fee=12000 student=JohnDoe textBook=kor_book #Success
+http POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements courseId=1 status=start #Success
+http POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/classes courseId=1 fee=12000 student=JohnDoe textBook=kor_book #Success
 ```
 
 - 또한 과도한 요청시에 서비스 장애가 도미노 처럼 벌어질 수 있다. 
@@ -579,27 +591,29 @@ http POST http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.am
 
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
 
-
-결제가 이루어진 후에 배송시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 배송 시스템의 처리를 위하여 결제주문이 블로킹 되지 않아도록 처리한다.
+광고등록 취소가 이루어진 후에 결제시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 광고 시스템의 처리를 위하여 결제주문이 블로킹 되지 않아도록 처리한다.
  
-- 이를 위하여 결제이력에 기록을 남긴 후에 곧바로 결제승인이 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
+- 이를 위하여 광고 이력에 기록을 남긴 후에 곧바로 광고취소가 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
  
 ```
 package lecture;
 
 @Entity
-@Table(name = "Payment_table")
-public class Payment {
+@Table(name="Advertisement_table")
+public class Advertisement {
+
 
 ...
-    @PostPersist
-    public void onPostPersist() {
-        PaymentApproved paymentApproved = new PaymentApproved();
-        BeanUtils.copyProperties(this, paymentApproved);
-        paymentApproved.publishAfterCommit();
+    @PreRemove
+    public void onPreRemove(){
+        AdCanceled adCanceled = new AdCanceled();
+        BeanUtils.copyProperties(this, adCanceled);
+        adCanceled.publishAfterCommit();
+
+        System.out.println("*****************onPreRemove");
     }
 ```
-- 배송 서비스에서는 결제승인 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
+- 결제 서비스에서는 광고취소 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
 
 ```
 package lecture;
@@ -610,85 +624,34 @@ package lecture;
 public class PolicyHandler {
 
     @Autowired
-    DeliveryRepository deliveryRepository;
-
-    @Autowired
-    CourseRepository courseRepository;
+    PaymentRepository paymentRepository;
 
     @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverPaymentApproved_DeliveryTextbook(@Payload PaymentApproved paymentApproved) {
+    public void wheneverAdCanceled_CancelPayment(@Payload AdCanceled adCanceled){
 
-        if (paymentApproved.isMe()) {
+       // if(!adCanceled.validate()) return;
 
-            Delivery delivery = new Delivery();
-            delivery.setClassId(paymentApproved.getClassId());
-            delivery.setCourseId(paymentApproved.getCourseId());
-            delivery.setStudent(paymentApproved.getStudent());
-            delivery.setPaymentId(paymentApproved.getId());
-            delivery.setTextBook(paymentApproved.getTextBook());
-            delivery.setStatus("DELIVERY_START");
+        //System.out.println("\n\n##### listener CancelPayment : " + adCanceled.toJson() + "\n\n");
 
-            Optional<Course> opt = courseRepository.findById(paymentApproved.getClassId());
+        // Sample Logic //
+        //Payment payment = new Payment();
+        //paymentRepository.save(payment);
+        if (adCanceled.isMe()) {
+            List<Payment> paymentList = paymentRepository.findByAdId(adCanceled.getId());
 
-            Course course;
-            if (opt.isPresent()) {
-                course = opt.get();
-                delivery.setTextBook(course.getTextBook());
+            for (Payment payment : paymentList) {
+                payment.setStatus("CANCEL");
+                paymentRepository.save(payment);
             }
-            deliveryRepository.save(delivery);
-        }
+        }     
     }
-```
-실제 구현을 하자면, 학생은 결제완료와 동시에 책 배송 및 수강신청이 완료 되었다는 SMS를 받고, 이후 수강/결제/배송 상태 변경은 Mypage Aggregate 내에서 처리
-  
-```
-    @Autowired
 
-    @StreamListener(KafkaProcessor.INPUT)
-    public void whenPaymentApproved_then_CREATE_1(@Payload PaymentApproved paymentApproved) {
-        try {
-            if (paymentApproved.isMe()) {
-                InquiryMypage inquiryMypage = new InquiryMypage();
-                inquiryMypage.setClassId(paymentApproved.getClassId());
-                inquiryMypage.setPaymentId(paymentApproved.getId());
-                inquiryMypage.setCourseId(paymentApproved.getCourseId());
-                inquiryMypage.setFee(paymentApproved.getFee());
-                inquiryMypage.setStudent(paymentApproved.getStudent());
-                inquiryMypage.setPaymentStatus(paymentApproved.getStatus());
-                inquiryMypage.setTextBook(paymentApproved.getTextBook());
-                inquiryMypage.setStatus("CLASS_START");
-				
-                // view 레파지토리에 save
-                inquiryMypageRepository.save(inquiryMypage);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-	
-	@StreamListener(KafkaProcessor.INPUT)
-    public void whenTextbookDeliveried_then_UPDATE_2(@Payload TextbookDeliveried textbookDeliveried) {
-        try {
-            if (textbookDeliveried.isMe()) {
-                List<InquiryMypage> inquiryMypageList = inquiryMypageRepository
-                        .findByPaymentId(textbookDeliveried.getPaymentId());
-                for (InquiryMypage inquiryMypage : inquiryMypageList) {
-                    inquiryMypage.setDeliveryStatus(textbookDeliveried.getStatus());
 
-                    // view 레파지 토리에 save
-                    inquiryMypageRepository.save(inquiryMypage);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-```
-
-배송 시스템은 수강신청/결제와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 배송시스템이 유지보수로 인해 잠시 내려간 상태라도 수강신청을 받는데 문제가 없다:
+광고 시스템은 강의등록/결제와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 광고시스템이 유지보수로 인해 잠시 내려간 상태라도 강의등록을 받는데 문제가 없다:
 
 ```
 # 배송 서비스 (course) 를 잠시 내려놓음 
+```
 cd ./course/kubernetes
 kubectl delete -f deployment.yml
 
@@ -706,7 +669,24 @@ kubectl apply -f deployment.yml
 # 배송 상태 확인
 http GET http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/inquiryMypages  # 배송 상태 "deliveryStatus": "DELIVERY_START"
 ```
+```
+# 광고 서비스 (advertisement) 를 잠시 내려놓음 
+cd ./advertisement/kubernetes
+kubectl delete -f deployment.yml
 
+# 강의 등록
+http POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/courses name=korean teacher=hong-gil-dong fee=10000 textBook=kor_book #Success
+
+# 강의등록 확인
+http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/courses   # 수강 신청 완료 
+http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8088/inquiryAdversises  # 광고관리조회시 강의 조회 안됨
+
+#광고 서비스 (advertisement) 기동
+kubectl apply -f deployment.yml
+
+# 광고 관리 확인
+http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8088/inquiryAdversises  # 광고관리조회시 강의 조회 됨
+```
 
 # 운영
 
