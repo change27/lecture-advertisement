@@ -891,48 +891,55 @@ Shortest transaction:           0.14
 
 - seige 로 배포작업 직전에 워크로드를 모니터링 함.
 ```
-siege -c100 -t120S -r10 -v --content-type "application/json" 'http://gateway:8080/courses POST {"name": "english", "teacher": "hong", "fee": 10000, "textBook": "eng_book"}'
-
-
-** SIEGE 4.0.5
+root@siege:/# siege -c100 -t120S -r10 -v  --content-type "application/json" 'http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements POST {"courseId": 1, "status": "start"}'
+[error] CONFIG conflict: selected time and repetition based testing
+defaulting to time-based testing: 120 seconds
+** SIEGE 4.0.4
 ** Preparing 100 concurrent users for battle.
 The server is now under siege...
-
-HTTP/1.1 201     3.43 secs:     251 bytes ==> POST http://gateway:8080/courses
-HTTP/1.1 201     1.28 secs:     251 bytes ==> POST http://gateway:8080/courses
-HTTP/1.1 201     0.20 secs:     251 bytes ==> POST http://gateway:8080/courses
-HTTP/1.1 201     3.44 secs:     251 bytes ==> POST http://gateway:8080/courses
-HTTP/1.1 201     1.18 secs:     251 bytes ==> POST http://gateway:8080/courses
-HTTP/1.1 201     0.28 secs:     251 bytes ==> POST http://gateway:8080/courses
-HTTP/1.1 201     1.41 secs:     251 bytes ==> POST http://gateway:8080/courses
-HTTP/1.1 201     1.22 secs:     251 bytes ==> POST http://gateway:8080/courses
-HTTP/1.1 201     0.21 secs:     251 bytes ==> POST http://gateway:8080/courses
-HTTP/1.1 201     0.13 secs:     251 bytes ==> POST http://gateway:8080/courses
-HTTP/1.1 201     1.41 secs:     251 bytes ==> POST http://gateway:8080/courses
-HTTP/1.1 201     1.31 secs:     251 bytes ==> POST http://gateway:8080/courses
+HTTP/1.1 201     7.69 secs:     234 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     7.74 secs:     234 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     7.73 secs:     234 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     7.63 secs:     234 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     7.73 secs:     234 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     7.73 secs:     234 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     7.69 secs:     236 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     7.73 secs:     234 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     7.74 secs:     234 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     7.73 secs:     234 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     8.02 secs:     236 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     8.00 secs:     236 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     8.03 secs:     236 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     8.12 secs:     236 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     8.41 secs:     236 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     9.27 secs:     236 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     9.44 secs:     236 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     9.43 secs:     236 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     9.41 secs:     236 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     9.44 secs:     236 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
 
 ```
 
 - 새버전(v0.1)으로의 배포 시작
 ```
-kubectl apply -f kubectl apply -f deployment_v0.1.yml
+kubectl apply -f deployment_v1.yml
 
 ```
 
 - seige 의 화면으로 넘어가서 Availability 가 100% 미만으로 떨어졌는지 확인
 ```
-Transactions:                    614 hits
-Availability:                  35.35 %
-Elapsed time:                  34.95 secs
-Data transferred:               0.38 MB
-Response time:                  3.87 secs
-Transaction rate:              17.57 trans/sec
-Throughput:                     0.01 MB/sec
-Concurrency:                   68.06
-Successful transactions:         614
+Transactions:                    875 hits
+Availability:                  43.79 %
+Elapsed time:                  58.99 secs
+Data transferred:               0.99 MB
+Response time:                  6.24 secs
+Transaction rate:              14.83 trans/sec
+Throughput:                     0.02 MB/sec
+Concurrency:                   92.52
+Successful transactions:         875
 Failed transactions:            1123
-Longest transaction:           29.72
-Shortest transaction:           0.00
+Longest transaction:           30.21
+Shortest transaction:           0.02
 ```
 배포 중 Availability 가 평소 100%에서 35% 대로 떨어지는 것을 확인. 원인은 쿠버네티스가 성급하게 새로 올려진 서비스를 READY 상태로 인식하여 서비스 유입을 진행한 것이기 때문. 이를 막기위해 Readiness Probe 를 설정함:
 
@@ -964,18 +971,18 @@ Shortest transaction:           0.00
 - 동일한 시나리오로 재배포 한 후 Availability 확인:
 ```
 Lifting the server siege...
-Transactions:                  39737 hits
-Availability:                 100.00 %
-Elapsed time:                 119.91 secs
-Data transferred:               9.66 MB
-Response time:                  0.30 secs
-Transaction rate:             331.39 trans/sec
-Throughput:                     0.08 MB/sec
-Concurrency:                   99.71
-Successful transactions:       39737
-Failed transactions:               0
-Longest transaction:            1.89
-Shortest transaction:           0.00
+Transactions:                   6163 hits
+Availability:                  94.24 %
+Elapsed time:                 119.08 secs
+Data transferred:               1.49 MB
+Response time:                  1.92 secs
+Transaction rate:              51.76 trans/sec
+Throughput:                     0.01 MB/sec
+Concurrency:                   99.19
+Successful transactions:        6163
+Failed transactions:             377
+Longest transaction:           11.61
+Shortest transaction:           0.08
 
 ```
 
