@@ -852,54 +852,36 @@ Shortest transaction:           0.03
 
 - 수강신청 및 결제서비스에 대한 replica 를 동적으로 늘려주도록 HPA 를 설정한다. 설정은 CPU 사용량이 30프로를 넘어서면 replica 를 10개까지 늘려준다
 ```
-kubectl autoscale deploy class --min=1 --max=10 --cpu-percent=30
-kubectl autoscale deploy pay --min=1 --max=10 --cpu-percent=30
+kubectl autoscale deployment class --min=1 --max=10 --cpu-percent=30
+kubectl autoscale deployment pay --min=1 --max=10 --cpu-percent=30
+kubectl autoscale deployment advertisement --min=1 --max=10 --cpu-percent=30
 ```
 - CB 에서 했던 방식대로 워크로드를 30초 동안 걸어준다. 
 ```
-siege -c50 -t30S -r10 -v --content-type "application/json" 'http://gateway:8080/classes POST {"courseId": 1, "fee": 10000, "student": "gil-dong", "textBook": "eng_book"}'
+siege -c50 -t30S -r10 -v --content-type "application/json" 'http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements POST {"courseId": 1, "status": "start"}'
 ```
 - 오토스케일이 어떻게 되고 있는지 모니터링을 걸어둔다:
 ```
 watch kubectl get pod,hpa
 ```
 - 어느정도 시간이 흐른 후 (약 30초) 스케일 아웃이 벌어지는 것을 확인할 수 있다:
-```
-NAME                                        REFERENCE          TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
-horizontalpodautoscaler.autoscaling/class   Deployment/class   69%/30%   1         10        5          6m25s
-horizontalpodautoscaler.autoscaling/pay     Deployment/pay     27%/30%   1         10        4          6m24s
+![15_scaleout](https://user-images.githubusercontent.com/80744183/121395342-48918480-c98d-11eb-94d4-95a4d27078fb.png)
 
-NAME                           READY   STATUS    RESTARTS   AGE
-pod/alert-7cbc74668-clsdv      2/2     Running   0          43m
-pod/class-5864b4f7cc-bm88m     0/1     Running   0          19s
-pod/class-5864b4f7cc-dbzvz     1/1     Running   0          3m37s
-pod/class-5864b4f7cc-fjscn     0/1     Running   0          34s
-pod/class-5864b4f7cc-jq2sq     0/1     Running   0          34s
-pod/class-5864b4f7cc-rzrz9     1/1     Running   0          13m
-pod/course-64978c8dd8-nwlxs    1/1     Running   0          42m
-pod/gateway-65d7888594-mqpls   1/1     Running   0          41m
-pod/pay-575875fc9-gtkss        1/1     Running   0          2m36s
-pod/pay-575875fc9-h28rg        1/1     Running   0          2m36s
-pod/pay-575875fc9-kk56d        1/1     Running   2          13m
-pod/pay-575875fc9-r2ll2        1/1     Running   0          2m36s
-pod/siege                      1/1     Running   0          5h41m
-:
-```
 - siege 의 로그를 보아도 전체적인 성공률이 높아진 것을 확인 할 수 있다. 
 ```
 Lifting the server siege...
-Transactions:                   1916 hits
-Availability:                  97.21 %
-Elapsed time:                  29.15 secs
-Data transferred:               0.47 MB
-Response time:                  0.74 secs
-Transaction rate:              65.73 trans/sec
-Throughput:                     0.02 MB/sec
-Concurrency:                   48.70
-Successful transactions:        1916
-Failed transactions:              55
-Longest transaction:            8.44
-Shortest transaction:           0.00
+Transactions:                    887 hits
+Availability:                  99.44 %
+Elapsed time:                  29.21 secs
+Data transferred:               0.20 MB
+Response time:                  1.62 secs
+Transaction rate:              30.37 trans/sec
+Throughput:                     0.01 MB/sec
+Concurrency:                   49.09
+Successful transactions:         887
+Failed transactions:               5
+Longest transaction:            8.94
+Shortest transaction:           0.14
 ```
 
 
