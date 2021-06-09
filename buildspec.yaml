@@ -7,7 +7,7 @@ env:
 phases:
   install:
     runtime-versions:
-      java: openjdk8
+      java: corretto11
       docker: 18
     commands:
       - echo install kubectl
@@ -44,36 +44,36 @@ phases:
           apiVersion: v1
           kind: Service
           metadata:
-            name: course
+            name: advertisement
             labels:
-              app: course
+              app: advertisement
           spec:
             ports:
               - port: 8080
                 targetPort: 8080
             selector:
-              app: course
+              app: advertisement
           EOF
       - |
           cat  <<EOF | kubectl apply -f -
           apiVersion: apps/v1
           kind: Deployment
           metadata:
-            name: course
+            name: advertisement
             labels:
-              app: course
+              app: advertisement
           spec:
             replicas: 1
             selector:
               matchLabels:
-                app: course
+                app: advertisement
             template:
               metadata:
                 labels:
-                  app: course
+                  app: advertisement
               spec:
                 containers:
-                  - name: course
+                  - name: advertisement
                     image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$_PROJECT_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
                     ports:
                       - containerPort: 8080
