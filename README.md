@@ -699,50 +699,20 @@ http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amaz
 ### codebuild 사용
 
 - 빌드 프로젝트 생성
-
-![image](https://user-images.githubusercontent.com/80744224/119322283-7356ba00-bcb8-11eb-806f-b0a8a2317783.png)
-
-
 - Github 계정 연결 후 Fork 한 리포지토리 연결
-
-![image](https://user-images.githubusercontent.com/80744224/119322218-6639cb00-bcb8-11eb-8d93-acbe471cdc68.png)
-
-
 - Webhook 을 설정하여 Github 에 코드가 푸쉬될 때마다 트리거 동작
-
-![image](https://user-images.githubusercontent.com/80744224/119322149-5621eb80-bcb8-11eb-94b8-7e2fd211d85a.png)
-
-
 - 빌드가 돌아갈 환경 설정
-
-![image](https://user-images.githubusercontent.com/80744224/119322908-17d8fc00-bcb9-11eb-9af1-158225ac4c6a.png)
-
-- AWS 계정 ID 
-
-![image](https://user-images.githubusercontent.com/80744224/119322675-d3e5f700-bcb8-11eb-8a74-a6532e8f5932.png)
-
-
+- AWS 계정 ID
 - 빌드 스펙
-
-![image](https://user-images.githubusercontent.com/80744224/119323010-33dc9d80-bcb9-11eb-93c6-33e0a26f73c9.png)
-
-
 - Codebuild 와 EKS 연결
 
--- KUBE_URL
-![image](https://user-images.githubusercontent.com/80744192/119440729-d51e2f00-bd5f-11eb-9b8d-1c5283fe300b.png)
-
-
--- KUBE_TOKEN
-![image](https://user-images.githubusercontent.com/80744192/119440815-fbdc6580-bd5f-11eb-85aa-8c50af946275.png)
-![image](https://user-images.githubusercontent.com/80744224/119324092-620ead00-bcba-11eb-895d-3abda8681720.png)
+![12_codebuild](https://user-images.githubusercontent.com/80744183/121360721-a1eabb00-c96f-11eb-9bf2-4c6d6be630b5.png)
 
 
 -- 배포 성공
 
-![image](https://user-images.githubusercontent.com/80744224/119431690-f9711000-bd4d-11eb-9c59-d43244d3f31a.png)
-
-
+![13_빌드성공](https://user-images.githubusercontent.com/80744183/121361225-0d348d00-c970-11eb-95ae-b4e644dfcf0b.png)
+![14_배포확인](https://user-images.githubusercontent.com/80744183/121361629-70beba80-c970-11eb-8c1e-34898f3e9272.png)
 
 
 ### docker images를 수작업 배포/기동
@@ -788,86 +758,93 @@ hystrix:
 - 30초 동안 실시
 
 ```
-$ siege -c50 -t30S -r10 -v --content-type "application/json" 'http://gateway:8080/classes POST {"courseId": 1, "fee": 10000, "student": "gil-dong", "textBook": "eng_book"}'
-
+root@siege:/# siege -c50 -t30S -r10 -v --content-type "application/json" 'http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements POST {"courseId": 1, "status": "start"}'
+[error] CONFIG conflict: selected time and repetition based testing
 defaulting to time-based testing: 30 seconds
 ** SIEGE 4.0.4
-** Preparing 10 concurrent users for battle.
+** Preparing 50 concurrent users for battle.
 The server is now under siege...
-
-HTTP/1.1 201     0.68 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.69 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.85 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.80 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.90 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.70 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.20 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.79 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.80 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.71 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.71 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.81 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.10 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.69 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.09 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.80 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     1.38 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.19 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.20 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.80 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.80 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.70 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.70 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.90 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.90 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.71 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.70 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.77 secs:     250 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 201     0.72 secs:     250 bytes ==> POST http://gateway:8080/classes
+HTTP/1.1 201     0.14 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.16 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.17 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.18 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.18 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.21 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.25 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.24 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.31 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.31 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.40 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.41 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.41 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.40 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.41 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.41 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.43 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.51 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.51 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.52 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.53 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.59 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 201     0.62 secs:     240 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
 
 * 요청이 과도하여 CB를 동작함 요청을 차단
 
-HTTP/1.1 500     1.31 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     1.51 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     1.42 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     1.52 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     1.51 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     1.71 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     1.99 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     2.60 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     1.70 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     1.70 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     1.72 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     1.91 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     1.68 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     2.10 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     2.80 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     1.82 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     2.08 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     0.38 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     1.60 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     1.90 secs:     221 bytes ==> POST http://gateway:8080/classes
-HTTP/1.1 500     0.49 secs:     221 bytes ==> POST http://gateway:8080/classes
+HTTP/1.1 500     1.59 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.52 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.62 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.43 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.44 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.55 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.63 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.60 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     0.12 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.92 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.74 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     2.45 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.74 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     2.50 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.43 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.31 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.51 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.49 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.50 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.49 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.41 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     2.00 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.41 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.21 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.41 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.33 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.30 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.35 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.55 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.35 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.53 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     1.36 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
+HTTP/1.1 500     0.11 secs:     228 bytes ==> POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements
 
 * 끝까지 500 에러 발생
 
 
-Lifting the server siege...
-Transactions:                    408 hits
-Availability:                  29.04 %
-Elapsed time:                  29.92 secs
-Data transferred:               0.31 MB
-Response time:                  3.57 secs
-Transaction rate:              13.64 trans/sec
-Throughput:                     0.01 MB/sec
-Concurrency:                   48.67
-Successful transactions:         408
-Failed transactions:             997
-Longest transaction:            4.19
-Shortest transaction:           0.09
+siege aborted due to excessive socket failure; you
+can change the failure threshold in $HOME/.siegerc
+
+Transactions:                    638 hits
+Availability:                  37.29 %
+Elapsed time:                  17.29 secs
+Data transferred:               0.38 MB
+Response time:                  1.34 secs
+Transaction rate:              36.90 trans/sec
+Throughput:                     0.02 MB/sec
+Concurrency:                   49.60
+Successful transactions:         638
+Failed transactions:            1073
+Longest transaction:            2.50
+Shortest transaction:           0.03
 
 ```
-- 운영시스템은 죽지 않고 지속적으로 CB 에 의하여 적절히 회로가 열림과 닫힘이 벌어지면서 자원을 보호하고 있음을 보여줌. 하지만, 29% 가 성공하였고, 71%가 실패했다는 것은 고객 사용성에 있어 좋지 않기 때문에 동적 Scale out (replica의 자동적 추가,HPA) 을 통하여 시스템을 확장 해주는 후속처리가 필요.
+- 운영시스템은 죽지 않고 지속적으로 CB 에 의하여 적절히 회로가 열림과 닫힘이 벌어지면서 자원을 보호하고 있음을 보여줌. 하지만, 37% 가 성공하였고, 63%가 실패했다는 것은 고객 사용성에 있어 좋지 않기 때문에 동적 Scale out (replica의 자동적 추가,HPA) 을 통하여 시스템을 확장 해주는 후속처리가 필요.
 
 ## 오토스케일 아웃
 앞서 CB 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
