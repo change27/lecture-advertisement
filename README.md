@@ -131,14 +131,14 @@
 ### 어그리게잇으로 묶기
 ![4_어그리게잇](https://user-images.githubusercontent.com/80744183/121274515-9c588b00-c905-11eb-822c-a84a4fa004fe.png)
 
-    - class의 수강신청, course의 강의등록, 결제의 결제이력은 그와 연결된 command 와 event 들에 의하여 트랜잭션이 유지되어야 하는 단위로 그들 끼리 묶어줌
+    - class의 수강신청, course의 강의등록, 결제의 결제이력, 광고의 광고등록은 그와 연결된 command 와 event 들에 의하여 트랜잭션이 유지되어야 하는 단위로 그들 끼리 묶어줌
 
 ### 바운디드 컨텍스트로 묶기
 
 ![5_바운디드컨텍스트](https://user-images.githubusercontent.com/80744183/121274531-a67a8980-c905-11eb-98bf-36e4c0ec4c35.png)
 
     - 도메인 서열 분리 
-        - Core Domain:  class, course : 없어서는 안될 핵심 서비스이며, 연견 Up-time SLA 수준을 99.999% 목표, 배포주기는 class 의 경우 1주일 1회 미만, course 의 경우 1개월 1회 미만
+        - Core Domain:  class, course, advertisement : 없어서는 안될 핵심 서비스이며, 연견 Up-time SLA 수준을 99.999% 목표, 배포주기는 class 의 경우 1주일 1회 미만, course 의 경우 1개월 1회 미만
         - General Domain:   pay : 결제서비스로 3rd Party 외부 서비스를 사용하는 것이 경쟁력이 높음 (핑크색으로 이후 전환할 예정)
 
 ### 폴리시 부착 (괄호는 수행주체, 폴리시 부착을 둘째단계에서 해놔도 상관 없음. 전체 연계가 초기에 드러남)
@@ -188,6 +188,7 @@
     - 마이크로 서비스를 넘나드는 시나리오에 대한 트랜잭션 처리
         - 수강생 주문시 결제처리:  결제가 완료되지 않은 주문은 절대 받지 않는다는 경영자의 오랜 신념(?) 에 따라, ACID 트랜잭션 적용. 주문와료시 결제처리에 대해서는 Request-Response 방식 처리
         - 결제 완료시 배송처리:  pay 에서 course 마이크로서비스로 주문요청이 전달되는 과정에 있어서 Store 마이크로 서비스가 별도의 배포주기를 가지기 때문에 Eventual Consistency 방식으로 트랜잭션 처리함.
+	- 강사가 광고 등록시 결제 처리: 결제가 완료되야 광고가 등록되도록 
         - 나머지 모든 inter-microservice 트랜잭션: 주문상태, 배달상태 등 모든 이벤트에 대해 카톡을 처리하는 등, 데이터 일관성의 시점이 크리티컬하지 않은 모든 경우가 대부분이라 판단, Eventual Consistency 를 기본으로 채택함.
 
 
@@ -220,6 +221,9 @@ mvn spring-boot:run
 cd alert
 python alert_consumer.py
 python alert_web.py 
+
+cd advertisement
+mvn spring-boot:run 
 
 cd gateway
 mvn spring-boot:run
