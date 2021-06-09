@@ -575,15 +575,15 @@ cd ./pay/kubernetes
 kubectl delete -f deployment.yml
 
 # 수강 신청
-http POST http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/classes courseId=1 fee=10000 student=KimSoonHee textBook=eng_book #Fail
-http POST http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/classes courseId=1 fee=12000 student=JohnDoe textBook=kor_book #Fail
+http POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements courseId=1 status=start #Fail
+http POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/classes courseId=1 fee=12000 student=JohnDoe textBook=kor_book #Fail
 
 # 결제서비스 재기동
 kubectl apply -f deployment.yml
 
 # 수강 신청
-http POST http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/classes courseId=1 fee=10000 student=KimSoonHee textBook=eng_book #Success
-http POST http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/classes courseId=1 fee=12000 student=JohnDoe textBook=kor_book #Success
+http POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/advertisements courseId=1 status=start #Success
+http POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/classes courseId=1 fee=12000 student=JohnDoe textBook=kor_book #Success
 ```
 
 - 또한 과도한 요청시에 서비스 장애가 도미노 처럼 벌어질 수 있다. 
@@ -591,27 +591,29 @@ http POST http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.am
 
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
 
-
-결제가 이루어진 후에 배송시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 배송 시스템의 처리를 위하여 결제주문이 블로킹 되지 않아도록 처리한다.
+광고등록 취소가 이루어진 후에 결제시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 광고 시스템의 처리를 위하여 결제주문이 블로킹 되지 않아도록 처리한다.
  
-- 이를 위하여 결제이력에 기록을 남긴 후에 곧바로 결제승인이 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
+- 이를 위하여 광고 이력에 기록을 남긴 후에 곧바로 광고취소가 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
  
 ```
 package lecture;
 
 @Entity
-@Table(name = "Payment_table")
-public class Payment {
+@Table(name="Advertisement_table")
+public class Advertisement {
+
 
 ...
-    @PostPersist
-    public void onPostPersist() {
-        PaymentApproved paymentApproved = new PaymentApproved();
-        BeanUtils.copyProperties(this, paymentApproved);
-        paymentApproved.publishAfterCommit();
+    @PreRemove
+    public void onPreRemove(){
+        AdCanceled adCanceled = new AdCanceled();
+        BeanUtils.copyProperties(this, adCanceled);
+        adCanceled.publishAfterCommit();
+
+        System.out.println("*****************onPreRemove");
     }
 ```
-- 배송 서비스에서는 결제승인 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
+- 결제 서비스에서는 광고취소 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
 
 ```
 package lecture;
@@ -622,82 +624,30 @@ package lecture;
 public class PolicyHandler {
 
     @Autowired
-    DeliveryRepository deliveryRepository;
-
-    @Autowired
-    CourseRepository courseRepository;
+    PaymentRepository paymentRepository;
 
     @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverPaymentApproved_DeliveryTextbook(@Payload PaymentApproved paymentApproved) {
+    public void wheneverAdCanceled_CancelPayment(@Payload AdCanceled adCanceled){
 
-        if (paymentApproved.isMe()) {
+       // if(!adCanceled.validate()) return;
 
-            Delivery delivery = new Delivery();
-            delivery.setClassId(paymentApproved.getClassId());
-            delivery.setCourseId(paymentApproved.getCourseId());
-            delivery.setStudent(paymentApproved.getStudent());
-            delivery.setPaymentId(paymentApproved.getId());
-            delivery.setTextBook(paymentApproved.getTextBook());
-            delivery.setStatus("DELIVERY_START");
+        //System.out.println("\n\n##### listener CancelPayment : " + adCanceled.toJson() + "\n\n");
 
-            Optional<Course> opt = courseRepository.findById(paymentApproved.getClassId());
+        // Sample Logic //
+        //Payment payment = new Payment();
+        //paymentRepository.save(payment);
+        if (adCanceled.isMe()) {
+            List<Payment> paymentList = paymentRepository.findByAdId(adCanceled.getId());
 
-            Course course;
-            if (opt.isPresent()) {
-                course = opt.get();
-                delivery.setTextBook(course.getTextBook());
+            for (Payment payment : paymentList) {
+                payment.setStatus("CANCEL");
+                paymentRepository.save(payment);
             }
-            deliveryRepository.save(delivery);
-        }
+        }     
     }
-```
-실제 구현을 하자면, 학생은 결제완료와 동시에 책 배송 및 수강신청이 완료 되었다는 SMS를 받고, 이후 수강/결제/배송 상태 변경은 Mypage Aggregate 내에서 처리
-  
-```
-    @Autowired
 
-    @StreamListener(KafkaProcessor.INPUT)
-    public void whenPaymentApproved_then_CREATE_1(@Payload PaymentApproved paymentApproved) {
-        try {
-            if (paymentApproved.isMe()) {
-                InquiryMypage inquiryMypage = new InquiryMypage();
-                inquiryMypage.setClassId(paymentApproved.getClassId());
-                inquiryMypage.setPaymentId(paymentApproved.getId());
-                inquiryMypage.setCourseId(paymentApproved.getCourseId());
-                inquiryMypage.setFee(paymentApproved.getFee());
-                inquiryMypage.setStudent(paymentApproved.getStudent());
-                inquiryMypage.setPaymentStatus(paymentApproved.getStatus());
-                inquiryMypage.setTextBook(paymentApproved.getTextBook());
-                inquiryMypage.setStatus("CLASS_START");
-				
-                // view 레파지토리에 save
-                inquiryMypageRepository.save(inquiryMypage);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-	
-	@StreamListener(KafkaProcessor.INPUT)
-    public void whenTextbookDeliveried_then_UPDATE_2(@Payload TextbookDeliveried textbookDeliveried) {
-        try {
-            if (textbookDeliveried.isMe()) {
-                List<InquiryMypage> inquiryMypageList = inquiryMypageRepository
-                        .findByPaymentId(textbookDeliveried.getPaymentId());
-                for (InquiryMypage inquiryMypage : inquiryMypageList) {
-                    inquiryMypage.setDeliveryStatus(textbookDeliveried.getStatus());
 
-                    // view 레파지 토리에 save
-                    inquiryMypageRepository.save(inquiryMypage);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-```
-
-배송 시스템은 수강신청/결제와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 배송시스템이 유지보수로 인해 잠시 내려간 상태라도 수강신청을 받는데 문제가 없다:
+광고 시스템은 강의등록/결제와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 광고시스템이 유지보수로 인해 잠시 내려간 상태라도 강의등록을 받는데 문제가 없다:
 
 ```
 # 배송 서비스 (course) 를 잠시 내려놓음 
@@ -718,7 +668,24 @@ kubectl apply -f deployment.yml
 # 배송 상태 확인
 http GET http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/inquiryMypages  # 배송 상태 "deliveryStatus": "DELIVERY_START"
 ```
+```
+# 광고 서비스 (advertisement) 를 잠시 내려놓음 
+cd ./advertisement/kubernetes
+kubectl delete -f deployment.yml
 
+# 강의 등록
+http POST http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/courses name=korean teacher=hong-gil-dong fee=10000 textBook=kor_book #Success
+
+# 강의등록 확인
+http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8080/courses   # 수강 신청 완료 
+http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8088/inquiryAdversises  # 광고관리조회시 강의 조회 안됨
+
+#광고 서비스 (advertisement) 기동
+kubectl apply -f deployment.yml
+
+# 광고 관리 확인
+http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amazonaws.com:8088/inquiryAdversises  # 광고관리조회시 강의 조회 됨
+```
 
 # 운영
 
