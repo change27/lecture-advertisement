@@ -699,50 +699,20 @@ http GET http://ab6ac5308c2534f5989010e25f0115c7-110530436.eu-central-1.elb.amaz
 ### codebuild 사용
 
 - 빌드 프로젝트 생성
-
-![image](https://user-images.githubusercontent.com/80744224/119322283-7356ba00-bcb8-11eb-806f-b0a8a2317783.png)
-
-
 - Github 계정 연결 후 Fork 한 리포지토리 연결
-
-![image](https://user-images.githubusercontent.com/80744224/119322218-6639cb00-bcb8-11eb-8d93-acbe471cdc68.png)
-
-
 - Webhook 을 설정하여 Github 에 코드가 푸쉬될 때마다 트리거 동작
-
-![image](https://user-images.githubusercontent.com/80744224/119322149-5621eb80-bcb8-11eb-94b8-7e2fd211d85a.png)
-
-
 - 빌드가 돌아갈 환경 설정
-
-![image](https://user-images.githubusercontent.com/80744224/119322908-17d8fc00-bcb9-11eb-9af1-158225ac4c6a.png)
-
-- AWS 계정 ID 
-
-![image](https://user-images.githubusercontent.com/80744224/119322675-d3e5f700-bcb8-11eb-8a74-a6532e8f5932.png)
-
-
+- AWS 계정 ID
 - 빌드 스펙
-
-![image](https://user-images.githubusercontent.com/80744224/119323010-33dc9d80-bcb9-11eb-93c6-33e0a26f73c9.png)
-
-
 - Codebuild 와 EKS 연결
 
--- KUBE_URL
-![image](https://user-images.githubusercontent.com/80744192/119440729-d51e2f00-bd5f-11eb-9b8d-1c5283fe300b.png)
-
-
--- KUBE_TOKEN
-![image](https://user-images.githubusercontent.com/80744192/119440815-fbdc6580-bd5f-11eb-85aa-8c50af946275.png)
-![image](https://user-images.githubusercontent.com/80744224/119324092-620ead00-bcba-11eb-895d-3abda8681720.png)
+![12_codebuild](https://user-images.githubusercontent.com/80744183/121360721-a1eabb00-c96f-11eb-9bf2-4c6d6be630b5.png)
 
 
 -- 배포 성공
 
-![image](https://user-images.githubusercontent.com/80744224/119431690-f9711000-bd4d-11eb-9c59-d43244d3f31a.png)
-
-
+![13_빌드성공](https://user-images.githubusercontent.com/80744183/121361225-0d348d00-c970-11eb-95ae-b4e644dfcf0b.png)
+![14_배포확인](https://user-images.githubusercontent.com/80744183/121361629-70beba80-c970-11eb-8c1e-34898f3e9272.png)
 
 
 ### docker images를 수작업 배포/기동
