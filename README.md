@@ -651,6 +651,7 @@ public class PolicyHandler {
 
 ```
 # 배송 서비스 (course) 를 잠시 내려놓음 
+```
 cd ./course/kubernetes
 kubectl delete -f deployment.yml
 
