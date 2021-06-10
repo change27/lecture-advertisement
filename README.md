@@ -623,13 +623,6 @@ public class PolicyHandler {
     @StreamListener(KafkaProcessor.INPUT)
     public void wheneverAdCanceled_CancelPayment(@Payload AdCanceled adCanceled){
 
-       // if(!adCanceled.validate()) return;
-
-        //System.out.println("\n\n##### listener CancelPayment : " + adCanceled.toJson() + "\n\n");
-
-        // Sample Logic //
-        //Payment payment = new Payment();
-        //paymentRepository.save(payment);
         if (adCanceled.isMe()) {
             List<Payment> paymentList = paymentRepository.findByAdId(adCanceled.getId());
 
@@ -640,10 +633,10 @@ public class PolicyHandler {
         }     
     }
 
-
+```
 광고 시스템은 강의등록/결제와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 광고시스템이 유지보수로 인해 잠시 내려간 상태라도 강의등록을 받는데 문제가 없다:
 
-```
+
 # 배송 서비스 (course) 를 잠시 내려놓음 
 ```
 cd ./course/kubernetes
@@ -663,8 +656,9 @@ kubectl apply -f deployment.yml
 # 배송 상태 확인
 http GET http://aa8ed367406254fc0b4d73ae65aa61cd-24965970.ap-northeast-2.elb.amazonaws.com:8080/inquiryMypages  # 배송 상태 "deliveryStatus": "DELIVERY_START"
 ```
+
+# 광고 서비스 (advertisement) 를 잠시 내려놓음
 ```
-# 광고 서비스 (advertisement) 를 잠시 내려놓음 
 cd ./advertisement/kubernetes
 kubectl delete -f deployment.yml
 
