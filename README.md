@@ -179,7 +179,7 @@
 ![9_모델수정](https://user-images.githubusercontent.com/80744183/121274619-dc1f7280-c905-11eb-9ca5-1be92a079156.png)
     
     - 수정된 모델은 모든 요구사항을 커버함.
-    - 배송 등록 event의 경우 한 event로 통함함.
+    - 배송 등록 event의 경우 한 event로 통합함.
 
 ### 비기능 요구사항에 대한 검증
 
