@@ -404,7 +404,7 @@ Spring Cloud JPA를 사용하여 개발하였기 때문에 소스의 변경 부�
 
 ```
 
-- MS, mysql 서비스 확인 (kubectl get all)
+- MSA, mysql 서비스 확인 (kubectl get all)
 
 ```
 root@labs--1920632125:/home/project# kubectl get all
