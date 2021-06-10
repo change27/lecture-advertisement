@@ -275,13 +275,7 @@ public class Advertisement {
         }
 
 
-        //Following code causes dependency to external APIs
-        // it is NOT A GOOD PRACTICE. instead, Event-Policy mapping is recommended.
 
- //       lecture.external.Payment payment = new lecture.external.Payment();
- //       // mappings goes here
- //       Application.applicationContext.getBean(lecture.external.PaymentService.class)
- //           .pay(payment);
 
 
     }
@@ -399,9 +393,9 @@ Spring Cloud JPA를 사용하여 개발하였기 때문에 소스의 변경 부�
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://mysql-1621689014.mysql.svc.cluster.local:3306/paydb?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
+    url: jdbc:mysql://mysql-1623203575.default.svc.cluster.local:3306/paydb?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
     username: root
-    password: 2pAXUITEjo
+    password: j4URe9OEjt
   jpa:
     database: mysql
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
@@ -993,7 +987,7 @@ Shortest transaction:           0.08
 
 - kafka환경
 ```
-  운영 : kafka-1621824578.kafka.svc.cluster.local:9092
+  운영 : my-kafka.kafka.svc.cluster.local:9092
   개발 : localhost:9092
 ```
 
@@ -1005,7 +999,7 @@ kind: ConfigMap
 metadata:
   name: kafka-config
 data:
-  KAFKA_URL: kafka-1621824578.kafka.svc.cluster.local:9092
+  KAFKA_URL: my-kafka.kafka.svc.cluster.local:9092
   LOG_FILE: /tmp/debug.log
 ```
 
@@ -1013,7 +1007,7 @@ data:
 deployment yaml 파일
 
        - name: consumer
-          image: 052937454741.dkr.ecr.ap-northeast-2.amazonaws.com/lecture-consumer:latest 
+          image: 879772956301.dkr.ecr.eu-central-1.amazonaws.com/lecture-consumer:latest
           env:
           - name: KAFKA_URL
             valueFrom:
@@ -1047,49 +1041,52 @@ consumer = KafkaConsumer('lecture', bootstrap_servers=[
 * istio 설치, Kiali 구성, Jaeger 구성, Prometheus 및 Grafana 구성
 
 ```
-root@labs-1409824742:/home/project/team# kubectl get all -n istio-system
+root@labs--1920632125:~/istio-tutorial# kubectl get all -n istio-system
 NAME                                        READY   STATUS    RESTARTS   AGE
-pod/grafana-767c5487d6-tccjz                1/1     Running   0          24m
-pod/istio-egressgateway-74f9769788-5z25x    1/1     Running   0          10h
-pod/istio-ingressgateway-74645cb9df-6t4zk   1/1     Running   0          10h
-pod/istiod-756fdd548-rz5fn                  1/1     Running   0          10h
-pod/jaeger-566c547fb9-d9g8l                 1/1     Running   0          13s
-pod/kiali-89fd7f87b-mjtkl                   1/1     Running   0          10h
-pod/prometheus-788c945c9c-ft9wd             2/2     Running   0          10h
+pod/grafana-767c5487d6-lbs45                1/1     Running   0          7h5m
+pod/istio-egressgateway-74f9769788-jk4g5    1/1     Running   0          7h6m
+pod/istio-ingressgateway-74645cb9df-98v6n   1/1     Running   0          7h6m
+pod/istiod-756fdd548-zd88t                  1/1     Running   0          7h7m
+pod/jaeger-566c547fb9-zxfs5                 1/1     Running   0          7h5m
+pod/kiali-89fd7f87b-2fbfl                   1/1     Running   0          7h5m
+pod/prometheus-788c945c9c-8pp9j             2/2     Running   0          7h4m
 
-NAME                           TYPE           CLUSTER-IP       EXTERNAL-IP                                                                    PORT(S)                                                                      AGE
-service/grafana                LoadBalancer   10.100.27.22     a17ce955b36c643dba43634c3958f665-1939868886.ap-northeast-2.elb.amazonaws.com   3000:30186/TCP                                                               24m
-service/istio-egressgateway    ClusterIP      10.100.128.222   <none>                                                                         80/TCP,443/TCP,15443/TCP                                                     10h
-service/istio-ingressgateway   LoadBalancer   10.100.24.155    aac2dd82b25c4416b973f4e43609696a-1789343097.ap-northeast-2.elb.amazonaws.com   15021:31151/TCP,80:30591/TCP,443:31900/TCP,31400:31273/TCP,15443:32249/TCP   10h
-service/istiod                 ClusterIP      10.100.167.39    <none>                                                                         15010/TCP,15012/TCP,443/TCP,15014/TCP,853/TCP                                10h
-service/kiali                  LoadBalancer   10.100.5.19      a4aba4808c91d4027949418f3d13b407-827239036.ap-northeast-2.elb.amazonaws.com    20001:32662/TCP,9090:30625/TCP                                               10h
-service/prometheus             ClusterIP      10.100.32.199    <none>                                                                         9090/TCP                                                                     10h
-service/tracing                LoadBalancer   10.100.15.68     ae3b283c82cb34c0f88f2ca92fc70489-1898513510.ap-northeast-2.elb.amazonaws.com   80:30018/TCP                                                                 13s
-service/zipkin                 ClusterIP      10.100.208.86    <none>                                                                         9411/TCP                                                                     13s
+NAME                           TYPE           CLUSTER-IP       EXTERNAL-IP                                                                 PORT(S)                                                                      AGE
+service/grafana                ClusterIP      10.100.94.76     <none>                                                                      3000/TCP                                                                     7h5m
+service/istio-egressgateway    ClusterIP      10.100.38.69     <none>                                                                      80/TCP,443/TCP,15443/TCP                                                     7h6m
+service/istio-ingressgateway   LoadBalancer   10.100.173.142   a4caad97d226f4b82b605cb8365e2d8c-590940228.eu-central-1.elb.amazonaws.com   15021:32752/TCP,80:30859/TCP,443:31410/TCP,31400:32044/TCP,15443:30090/TCP   7h6m
+service/istiod                 ClusterIP      10.100.83.170    <none>                                                                      15010/TCP,15012/TCP,443/TCP,15014/TCP,853/TCP                                7h7m
+service/kiali                  LoadBalancer   10.100.138.219   a1eda2290a6a44b9f9b3137eaadf59e5-253193714.eu-central-1.elb.amazonaws.com   20001:30713/TCP,9090:32148/TCP                                               7h5m
+service/prometheus             ClusterIP      10.100.188.93    <none>                                                                      9090/TCP                                                                     7h5m
+service/tracing                LoadBalancer   10.100.27.109    a0de7d5a06db14944b51962431e3b701-325478590.eu-central-1.elb.amazonaws.com   80:30021/TCP                                                                 7h5m
+service/zipkin                 ClusterIP      10.100.105.187   <none>                                                                      9411/TCP                                                                     7h5m
 
 NAME                                   READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/grafana                1/1     1            1           24m
-deployment.apps/istio-egressgateway    1/1     1            1           10h
-deployment.apps/istio-ingressgateway   1/1     1            1           10h
-deployment.apps/istiod                 1/1     1            1           10h
-deployment.apps/jaeger                 1/1     1            1           14s
-deployment.apps/kiali                  1/1     1            1           10h
-deployment.apps/prometheus             1/1     1            1           10h
+deployment.apps/grafana                1/1     1            1           7h5m
+deployment.apps/istio-egressgateway    1/1     1            1           7h7m
+deployment.apps/istio-ingressgateway   1/1     1            1           7h7m
+deployment.apps/istiod                 1/1     1            1           7h7m
+deployment.apps/jaeger                 1/1     1            1           7h5m
+deployment.apps/kiali                  1/1     1            1           7h5m
+deployment.apps/prometheus             1/1     1            1           7h5m
 
 NAME                                              DESIRED   CURRENT   READY   AGE
-replicaset.apps/grafana-767c5487d6                1         1         1       24m
-replicaset.apps/istio-egressgateway-74f9769788    1         1         1       10h
-replicaset.apps/istio-ingressgateway-74645cb9df   1         1         1       10h
-replicaset.apps/istiod-756fdd548                  1         1         1       10h
-replicaset.apps/jaeger-566c547fb9                 1         1         1       13s
-replicaset.apps/kiali-89fd7f87b                   1         1         1       10h
-replicaset.apps/prometheus-788c945c9c             1         1         1       10h
+replicaset.apps/grafana-767c5487d6                1         1         1       7h5m
+replicaset.apps/istio-egressgateway-74f9769788    1         1         1       7h7m
+replicaset.apps/istio-ingressgateway-74645cb9df   1         1         1       7h7m
+replicaset.apps/istiod-756fdd548                  1         1         1       7h7m
+replicaset.apps/jaeger-566c547fb9                 1         1         1       7h5m
+replicaset.apps/kiali-89fd7f87b                   1         1         1       7h5m
+replicaset.apps/prometheus-788c945c9c             1         1         1       7h5m
+root@labs--1920632125:~/istio-tutorial# 
 ```
-- Tracing (Kiali) http://a4aba4808c91d4027949418f3d13b407-827239036.ap-northeast-2.elb.amazonaws.com:20001/
-![image](https://user-images.githubusercontent.com/80744192/119357389-79619080-bce2-11eb-88b8-41fceafc8568.png)
+- Tracing (Kiali) http://a1eda2290a6a44b9f9b3137eaadf59e5-253193714.eu-central-1.elb.amazonaws.com:20001
+![16_kiali](https://user-images.githubusercontent.com/80744183/121446679-05f09c00-c9cf-11eb-8365-3bb985b8804c.png)
 
-- Jaeger http://ae3b283c82cb34c0f88f2ca92fc70489-1898513510.ap-northeast-2.elb.amazonaws.com/
-![image](https://user-images.githubusercontent.com/80744192/119419756-ed795400-bd35-11eb-9530-6af13f3bfa5d.png)
+
+- Jaeger http://a0de7d5a06db14944b51962431e3b701-325478590.eu-central-1.elb.amazonaws.com:80
+![17_Jaeger](https://user-images.githubusercontent.com/80744183/121446696-130d8b00-c9cf-11eb-8fa9-018229a94f8a.png)
+
 
 - 모니터링 (Grafana) http://http://a17ce955b36c643dba43634c3958f665-1939868886.ap-northeast-2.elb.amazonaws.com:3000/
 ![image](https://user-images.githubusercontent.com/80744192/119419299-f1f13d00-bd34-11eb-88ec-6cfce29ca234.png)
